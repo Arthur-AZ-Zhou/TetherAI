@@ -1,6 +1,5 @@
-import { createContext, useContext, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useState, useEffect, type PropsWithChildren } from 'react';
 
-// --- 1. NEW: Define the "shape" of a User ---
 interface User {
   id: string;
   name: string;
@@ -9,8 +8,9 @@ interface User {
 // --- 2. NEW: Define the "shape" of our Context ---
 interface AuthContextType {
   user: User | null; // The user can be a User object or null
-  signIn: () => void;
+  signIn: (email: string, pass: string) => void;
   signOut: () => void;
+  isLoading: boolean;
 }
 
 // --- 3. UPDATED: Create the Auth Context ---
@@ -23,28 +23,28 @@ export function AuthProvider({ children }: PropsWithChildren) {
   // --- UPDATED: Tell useState its type ---
   // The state can be a User or null, starting as null
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // BEGINS AS LOADING = TRUE
 
-  const signIn = () => {
-    // This is a fake login. In a real app, you'd call an API
-    console.log("Signing in...");
-    // This is now VALID because TypeScript knows it matches the 'User' type
+  useEffect(() => {
+    // In a real app, you'd check secure storage here.
+    // For now, we just simulate a quick check.
+    setTimeout(() => {
+      setIsLoading(false); // <-- NEW: We are done checking
+    }, 1); // A tiny delay ensures this runs after the initial render cycle
+  }, []);
+
+  const signIn = (email: string, pass: string) => {
+    if (!email || !pass) throw new Error("Email and password are required.");
     setUser({ id: '1', name: 'Test User' });
   };
 
   const signOut = () => {
     console.log("Signing out...");
-    setUser(null); // This is also valid
-  };
-
-  // We can even type this value for extra safety
-  const authContextValue: AuthContextType = {
-    user,
-    signIn,
-    signOut
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={authContextValue}>
+    <AuthContext.Provider value={{ user, signIn, signOut, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

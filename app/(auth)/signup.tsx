@@ -1,44 +1,82 @@
-// --- This is the correct code for app/(auth)/signup.tsx ---
-
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, TextInput, Alert } from 'react-native';
 import { Link } from 'expo-router';
-import { useAuth } from '../../context/AuthContext'; // Note the path: ../../
+import { useAuth } from '../../context/AuthContext';
+import { useState } from 'react';
 
 export default function SignUp() {
-  // We'll just re-use the 'signIn' function for our fake auth
-  const { signIn } = useAuth(); 
+  const { signIn } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const onSignUpPress = () => {
+    // In a real app, you'd call a separate 'signUp' function
+    // For now, we'll just call signIn with the new credentials
+    try {
+      signIn(email, password);
+    } catch (error: any) {
+      Alert.alert("Sign Up Failed", error.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
       
-      {/*
-        In a real app, this would call a 'signUp' function.
-        For our test, we'll just call 'signIn'.
-      */}
-      <Button title="Sign Up & Log In" onPress={() => signIn()} />
+      {/* --- 5. Add the new input fields --- */}
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
 
-      {/* This links back to the login page. */}
+      {/* --- 6. Update the button --- */}
+      <Button title="Sign Up & Log In" onPress={onSignUpPress} />
+
       <Link href="/login" style={styles.link}>
-        <Text>Already have an account? Log In</Text>
+        <Text style={styles.linkText}>Already have an account? Log In</Text>
       </Link>
     </View>
   );
 }
 
-// You can add some styles to make it look nice
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20
+    marginBottom: 40,
+  },
+  input: {
+    width: '100%',
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    fontSize: 16,
   },
   link: {
-    marginTop: 15,
+    marginTop: 20,
+  },
+  linkText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '600',
   }
 });

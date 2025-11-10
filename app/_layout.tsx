@@ -4,28 +4,31 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 
 // This is our main "gatekeeper"
 function RootLayout() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+    
     // `segments` is the path array, e.g., ['(app)', 'index'] or ['(auth)', 'login']
-    const inAppGroup = segments[0] === '(app)';
+    const inAuthGroup = segments[0] === '(auth)';
+    console.log("Segments:", segments);
+    console.log("User:", user);
 
-    if (user && !inAppGroup) {
-      // User is signed in but not in the (app) group...
-      // Redirect them to the (app) homepage
-      // The URL for app/(app)/index.tsx is just "/"
+    if (user && inAuthGroup) {
       router.replace('/'); 
-      
-    } else if (!user && inAppGroup) {
-      // User is signed out but is in the (app) group...
-      // Redirect them to the (auth) login page
-      // The URL for app/(auth)/login.tsx is "/login"
+    } else if (!user && !inAuthGroup) {
       router.replace('/login');
     }
 
-  }, [user, segments, router]); // Re-run this effect when 'user' or 'segments' change
+  }, [user, segments, router, isLoading]); // Re-run this effect when 'user' or 'segments' change
+
+  if (isLoading) {
+    return null;
+  }
 
   // <Slot /> renders the current page (e.g., login.tsx or index.tsx)
   return <Slot />;
